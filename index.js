@@ -93,7 +93,7 @@ Example:
       .slice(0, 32)
   );
 
-  console.log('    private seed', u8aToHex(pair.secretKey.slice(0, 32)));
+  console.log('    ed25519 seed', u8aToHex(pair.secretKey.slice(0, 32)));
   console.log();
   // console.log('      public key', u8aToHex(pair.publicKey));
   console.log('   address (DOT)', encodeAddress(pair.publicKey, 0));
