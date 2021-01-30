@@ -1,20 +1,18 @@
 const BN = require('bn.js');
 const bip39 = require('bip39');
 const hash = require('hash.js');
-const { u8aToHex }= require('@polkadot/util');
-const { encodeAddress, naclKeypairFromSeed } = require('@polkadot/util-crypto');
+const { assert, u8aToHex } = require('@polkadot/util');
+const { encodeAddress, mnemonicValidate, naclKeypairFromSeed } = require('@polkadot/util-crypto');
 
-const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
-const accountIndex = 0;
-const addressIndex = 0;
-
-// 0x01b2 for Kusama, 0x0162 for Polkadot
-const path = `m/44'/${0x01b2}'/${accountIndex}'/0'/${addressIndex}'`;
+// create a derivation path
+function getPath (chain, account, address) {
+  return `m/44'/${chain.toLowerCase() === 'polkadot' ? 0x0162 : 0x01b2}'/${account}'/0'/${address}'`;
+}
 
 // performs hard-only derivation on the xprv
 function derivePrivate (xprv, index) {
-  let kl = xprv.slice(0, 32);
-  let kr = xprv.slice(32, 64);
+  const kl = xprv.slice(0, 32);
+  const kr = xprv.slice(32, 64);
   const cc = xprv.slice(64, 96);
 
   const data = Buffer.allocUnsafe(1 + 64 + 4);
@@ -37,7 +35,7 @@ function derivePrivate (xprv, index) {
   let right = new BN(kr, 16, 'le').add(new BN(zr, 16, 'le')).toArrayLike(Buffer, 'le').slice(0, 32);
 
   if (right.length !== 32) {
-    right = Buffer.from(right.toString('hex') + '00', 'hex')
+    right = Buffer.from(right.toString('hex') + '00', 'hex');
   }
 
   return Buffer.from([...left, ...right, ...chainCode]);
@@ -61,23 +59,50 @@ function getLedgerMasterKey (mnemonic) {
 }
 
 async function main () {
+  const args = process.argv.slice(2);
+
+  assert(args.length === 4, `Expected 4 arguments:
+
+  app type - Either polkadot or kusama
+  mnemonic - The full 24-word mnemonic (enclose it with " at the start and end)
+   account - The index of the account you are using
+   address - The index of the address you are using
+
+Example:
+
+  npm start kusama "abandon ... about" 0 0
+`);
+
+  const [appType, _mnemonic, _accountIndex, _addressIndex] = args;
+  const accountIndex = parseInt(_accountIndex, 10);
+  const addressIndex = parseInt(_addressIndex, 10);
+  const mnemonic = _mnemonic.trim();
+
+  assert(['polkadot', 'kusama'].includes(appType.toLowerCase()), `Invalid app type specified, expected one of polkadot or kusama`);
+  assert(mnemonicValidate(mnemonic), 'Invalid mnemonic specified');
+  assert(!isNaN(accountIndex) && !isNaN(addressIndex), 'Account and address indexes need to be numberic');
+
   // Just a test to see if we align with the known seed (useful for adjustments here)
-  console.log('   algo valid', getLedgerMasterKey('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about').toString('hex') === '402b03cd9c8bed9ba9f9bd6cd9c315ce9fcc59c7c25d37c85a36096617e69d418e35cb4a3b737afd007f0688618f21a8831643c0e6c77fc33c06026d2a0fc93832596435e70647d7d98ef102a32ea40319ca8fb6c851d7346d3bd8f9d1492658', '\n');
+  // console.log('   algo valid', getLedgerMasterKey('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about').toString('hex') === '402b03cd9c8bed9ba9f9bd6cd9c315ce9fcc59c7c25d37c85a36096617e69d418e35cb4a3b737afd007f0688618f21a8831643c0e6c77fc33c06026d2a0fc93832596435e70647d7d98ef102a32ea40319ca8fb6c851d7346d3bd8f9d1492658', '\n');
 
   const pair = naclKeypairFromSeed(
-    path
+    getPath(appType, accountIndex, addressIndex)
       .split('/')
       .slice(1)
       .reduce((x, n) => derivePrivate(x, parseInt(n.replace("'", ''), 10) + 0x80000000), getLedgerMasterKey(mnemonic))
       .slice(0, 32)
   );
 
-  console.log('      private', u8aToHex(pair.secretKey.slice(0, 32)));
-  console.log('       public', u8aToHex(pair.publicKey));
+  console.log('    private seed', u8aToHex(pair.secretKey.slice(0, 32)));
   console.log();
-  console.log('     addr DOT', encodeAddress(pair.publicKey, 0));
-  console.log('     addr KSM', encodeAddress(pair.publicKey, 2));
+  // console.log('      public key', u8aToHex(pair.publicKey));
+  console.log('   address (DOT)', encodeAddress(pair.publicKey, 0));
+  console.log('   address (KSM)', encodeAddress(pair.publicKey, 2));
   console.log();
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error('ERROR:', error.message);
+
+  process.exit(0);
+});
