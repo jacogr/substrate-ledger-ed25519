@@ -93,11 +93,11 @@ Example:
       .slice(0, 32)
   );
 
-  console.log('    ed25519 seed', u8aToHex(pair.secretKey.slice(0, 32)));
+  console.log('\t ed25519 seed\t', u8aToHex(pair.secretKey.slice(0, 32)));
   console.log();
   // console.log('      public key', u8aToHex(pair.publicKey));
-  console.log('   address (DOT)', encodeAddress(pair.publicKey, 0));
-  console.log('   address (KSM)', encodeAddress(pair.publicKey, 2));
+  console.log('\taddress (DOT)\t', encodeAddress(pair.publicKey, 0));
+  console.log('\taddress (KSM)\t', encodeAddress(pair.publicKey, 2));
   console.log();
 }
 
