@@ -1,8 +1,8 @@
 const BN = require('bn.js');
 const bip39 = require('bip39');
 const hash = require('hash.js');
-const Eddsa = require('elliptic').eddsa;
-const { encodeAddress } = require('@polkadot/util-crypto');
+const { u8aToHex }= require('@polkadot/util');
+const { encodeAddress, naclKeypairFromSeed } = require('@polkadot/util-crypto');
 
 const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 const accountIndex = 0;
@@ -64,21 +64,19 @@ async function main () {
   // Just a test to see if we align with the known seed (useful for adjustments here)
   console.log('   algo valid', getLedgerMasterKey('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about').toString('hex') === '402b03cd9c8bed9ba9f9bd6cd9c315ce9fcc59c7c25d37c85a36096617e69d418e35cb4a3b737afd007f0688618f21a8831643c0e6c77fc33c06026d2a0fc93832596435e70647d7d98ef102a32ea40319ca8fb6c851d7346d3bd8f9d1492658', '\n');
 
-  const pair = new Eddsa('ed25519').keyFromSecret(
+  const pair = naclKeypairFromSeed(
     path
       .split('/')
       .slice(1)
       .reduce((x, n) => derivePrivate(x, parseInt(n.replace("'", ''), 10) + 0x80000000), getLedgerMasterKey(mnemonic))
       .slice(0, 32)
   );
-  const [privateKey, publicKey] = [Buffer.from(pair.getSecret()), Buffer.from(pair.getPublic())];
-  const publicHex = publicKey.toString('hex');
 
-  console.log('      private', `0x${privateKey.toString('hex')}`);
-  console.log('       public', `0x${publicKey.toString('hex')}`);
+  console.log('      private', u8aToHex(pair.secretKey.slice(0, 32)));
+  console.log('       public', u8aToHex(pair.publicKey));
   console.log();
-  console.log('     addr DOT', encodeAddress(`0x${publicHex}`, 0));
-  console.log('     addr KSM', encodeAddress(`0x${publicHex}`, 2));
+  console.log('     addr DOT', encodeAddress(pair.publicKey, 0));
+  console.log('     addr KSM', encodeAddress(pair.publicKey, 2));
   console.log();
 }
 
