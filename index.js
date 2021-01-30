@@ -1,5 +1,6 @@
 const BN = require('bn.js');
-const crypto = require('crypto');
+const bip39 = require('bip39');
+const hash = require('hash.js');
 const Eddsa = require('elliptic').eddsa;
 const { encodeAddress } = require('@polkadot/util-crypto');
 
@@ -8,7 +9,7 @@ const accountIndex = 0;
 const addressIndex = 0;
 
 // 0x01b2 for Kusama, 0x0162 for Polkadot
-const path = `m/${0x2c}'/${0x01b2}'/${accountIndex}'/0'/${addressIndex}'`;
+const path = `m/44'/${0x01b2}'/${accountIndex}'/0'/${addressIndex}'`;
 
 // performs hard-only derivation on the xprv
 function derivePrivate (xprv, index) {
@@ -24,11 +25,11 @@ function derivePrivate (xprv, index) {
 
   data[0] = 0x00;
 
-  const z = crypto.createHmac('sha512', cc).update(data).digest();
+  const z = hash.hmac(hash.sha512, cc).update(data).digest();
 
   data[0] = 0x01;
 
-  const i = crypto.createHmac('sha512', cc).update(data).digest();
+  const i = hash.hmac(hash.sha512, cc).update(data).digest();
   const chainCode = i.slice(32, 64);
   const zl = z.slice(0, 32);
   const zr = z.slice(32, 64);
@@ -39,24 +40,24 @@ function derivePrivate (xprv, index) {
     right = Buffer.from(right.toString('hex') + '00', 'hex')
   }
 
-  return Buffer.concat([left, right, chainCode]);
+  return Buffer.from([...left, ...right, ...chainCode]);
 }
 
 // gets an xprv from a mnemonic
 function getLedgerMasterKey (mnemonic) {
-  const masterSeed = crypto.pbkdf2Sync(mnemonic, 'mnemonic', 2048, 64, 'sha512');
-  const chainCode = crypto.createHmac('sha256', 'ed25519 seed').update(new Uint8Array([1, ...masterSeed])).digest();
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+  const chainCode = hash.hmac(hash.sha256, 'ed25519 seed').update(new Uint8Array([1, ...seed])).digest();
   let priv;
 
   while (!priv || (priv[31] & 0b0010_0000)) {
-    priv = crypto.createHmac('sha512', 'ed25519 seed').update(priv || masterSeed).digest();
+    priv = hash.hmac(hash.sha512, 'ed25519 seed').update(priv || seed).digest();
   }
 
   priv[0]  &= 0b1111_1000;
   priv[31] &= 0b0111_1111;
   priv[31] |= 0b0100_0000;
 
-  return Buffer.concat([priv, chainCode]);
+  return Buffer.from([...priv, ...chainCode]);
 }
 
 async function main () {
@@ -67,7 +68,7 @@ async function main () {
     path
       .split('/')
       .slice(1)
-      .reduce((xprv, n) => derivePrivate(xprv, parseInt(n.replace("'", ''), 10) + 0x80000000), getLedgerMasterKey(mnemonic))
+      .reduce((x, n) => derivePrivate(x, parseInt(n.replace("'", ''), 10) + 0x80000000), getLedgerMasterKey(mnemonic))
       .slice(0, 32)
   );
   const [privateKey, publicKey] = [Buffer.from(pair.getSecret()), Buffer.from(pair.getPublic())];
