@@ -6,6 +6,7 @@ A sample to extract a Ledger-compatible ed25519 private key using a known mnemon
 ## Installation
 
 - Clone the repo via `git clone https://github.com/jacogr/sample-ledger-ed25519.git`
+- Change into the folder `cd sample-ledger-ed25519`
 - Install the dependencies via `npm install` (or `yarn`)
 
 
