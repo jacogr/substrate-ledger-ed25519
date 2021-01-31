@@ -11,14 +11,14 @@ A sample to extract a Ledger-compatible ed25519 private key using a known mnemon
 
 ## Usage
 
-`npm start <polkadot|kusma> "mnemonic seed, quoted" <account> <address>`
+`npm start <polkadot|kusma> <mnemonic> <account> <address>`
 
 Where the 4 arguments are:
 
-- app type - Either polkadot or kusama
-- mnemonic - The full 24-word mnemonic (enclose it with " at the start and end)
-- account - The index of the account you are using
-- address - The index of the address you are using
+- app type - Either `polkadot` or `kusama`, e.g. `kusama`
+- mnemonic - The full quoted 24-word mnemonic (enclose it with " at the start and end), e.g. `"abandon ... about"`
+- account - The index of the account you are using, e.g `0`
+- address - The index of the address you are using, e.g. `0`
 
 Example:
 
