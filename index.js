@@ -1,6 +1,6 @@
 const { all: networks } = require('@polkadot/networks');
 const { assert, u8aToHex } = require('@polkadot/util');
-const { encodeAddress, hdLedger, mnemonicValidate } = require('@polkadot/util-crypto');
+const { encodeAddress, hdLedger } = require('@polkadot/util-crypto');
 
 async function main () {
   const args = process.argv.slice(2);
@@ -30,7 +30,6 @@ Example:
   const network = ledgerNets.find(({ network }) => network === appType);
 
   assert(network && network.slip44, `Invalid app type specified, expected one of ${ledgerNets.map(({ network }) => network).join(', ')}`);
-  assert(mnemonicValidate(mnemonic), 'Invalid mnemonic specified');
   assert(!isNaN(accountIndex) && !isNaN(addressIndex), 'Account and address indexes need to be numeric');
 
   const pair = hdLedger(mnemonic, `m/44'/${network.slip44}'/${accountIndex}'/0'/${addressIndex}'`);
