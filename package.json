@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node ./index.js"
   },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "@polkadot/networks": "^6.5.1",
     "@polkadot/util": "^6.5.1",
