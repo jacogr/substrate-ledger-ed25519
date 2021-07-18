@@ -21,6 +21,10 @@ Where the 4 arguments are:
 - account - The index of the account you are using, e.g `0`
 - address - The index of the address you are using, e.g. `0`
 
+Mac OS / Linux:
+
+- `history -c` once completed to delete terminal history
+
 Example:
 
   `npm start kusama "abandon ... about" 0 0`
