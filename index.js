@@ -1,4 +1,4 @@
-const { all: networks } = require('@polkadot/networks');
+const { allNetworks } = require('@polkadot/networks');
 const { assert, u8aToHex } = require('@polkadot/util');
 const { encodeAddress, hdLedger } = require('@polkadot/util-crypto');
 
@@ -26,7 +26,7 @@ Example:
   const addressIndex = parseInt(_addressIndex, 10);
   const appType = _appType.toLowerCase();
   const mnemonic = _mnemonic.trim();
-  const ledgerNets = networks.filter(({ hasLedgerSupport }) => hasLedgerSupport);
+  const ledgerNets = allNetworks.filter(({ hasLedgerSupport }) => hasLedgerSupport);
   const network = ledgerNets.find(({ network }) => network === appType);
 
   assert(network && network.slip44, `Invalid app type specified, expected one of ${ledgerNets.map(({ network }) => network).join(', ')}`);
