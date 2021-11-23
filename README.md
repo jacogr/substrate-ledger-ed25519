@@ -28,3 +28,14 @@ Mac OS / Linux:
 Example:
 
   `npm start kusama "abandon ... about" 0 0`
+
+Full example (known seed):
+
+```
+npm start "kusama" "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about" 0 0
+
+	 ed25519 seed	 0x98cb4e14e0e08ea876f88d728545ea7572dc07dbbe69f1731c418fb827e69d41
+
+	address (DOT)	 15F8gp3or2mLW8yiJAZ9C3ZFpvEA8SPJDq4RXVpVjcXtdxJq
+	address (KSM)	 GpTCo8cccWnpFne7EKBwr677tWkEoeLbiAgks76fKisCUWP
+```
