@@ -1,12 +1,12 @@
-# sample-ledger-ed25519
+# substrate-ledger-ed25519
 
-A sample to extract a Ledger-compatible ed25519 private key using a known mnemonic.
+Extract Substrate and Polkadot-compatible ed25519 private keys from a known Ledger mnemonic. This allows you to recover the private key that is normally locked in the Ledger hardware.
 
 
 ## Installation
 
-- Clone the repo via `git clone https://github.com/jacogr/sample-ledger-ed25519.git`
-- Change into the folder `cd sample-ledger-ed25519`
+- Clone the repo via `git clone https://github.com/jacogr/substrate-ledger-ed25519.git`
+- Change into the folder `cd substrate-ledger-ed25519`
 - Install the dependencies via `npm install` (or `yarn`)
 
 
